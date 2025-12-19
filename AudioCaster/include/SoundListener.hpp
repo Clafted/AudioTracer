@@ -7,6 +7,7 @@
 #include "RayTracer.h"
 
 #define MAX_DETECTED 250	// miniaudio supports up to 254 channels
+#define THREAD_COUNT 8
 
 class SoundListener {
 private:
@@ -17,8 +18,10 @@ private:
 	Vec2 pos;
 	float sampleSize = 25;
 	float dTime = 0.0f;
-	int resolution = 20;
+	int resolution = THREAD_COUNT;
 	int numDetected = 0;
+
+	void samplePixels(LineBuffer& objects, int start, int end);
 
 public:
 	
@@ -32,7 +35,11 @@ public:
 
 	/* Listens for sounds from a buffer of objects
 	* objects, with elapsed time dTime. */
-	void listen(LineBuffer& objects, float dTime);
+	void listen(LineBuffer& objects);
+
+
+
+	/* INLINE FUNCIONS */
 
 	inline void incrementSampleSize(int increment) {
 		if (10 < sampleSize + increment) sampleSize += increment;
@@ -43,7 +50,7 @@ public:
 	}
 
 	inline void incrementResolution(int increment) {
-		if (30 < resolution + increment && resolution + increment < MAX_DETECTED) resolution += increment;
+		if (THREAD_COUNT <= resolution + increment && resolution + increment < MAX_DETECTED) resolution += increment;
 	}
 
 	inline void setPosition(Vec2 position) {

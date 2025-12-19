@@ -13,7 +13,7 @@ void TracerEngine::listen() {
 		sound->deleteOldSounds();
 	}
 	currentTime = GetTime();
-	listener.listen(lB, currentTime - prevTime);
+	listener.listen(lB);
 	prevTime = currentTime;
 	listener.playDetectedSounds();
 }

@@ -5,7 +5,7 @@
 #include "../include/TracerEngine.hpp"
 #include "../include/TracerVisualizer.hpp"
 #include "../include/BoundingVolumeHierarchy.h"
-
+#include <thread>
 #define VERTEX_FILE "resources/plan.csv"
 
 #include <iostream>
@@ -17,8 +17,7 @@ void runBVH();
 void runTracer();
 
 int main(){
-	runBVH();
-	//runTracer();
+	runTracer();
 	return 0;
 }
 
