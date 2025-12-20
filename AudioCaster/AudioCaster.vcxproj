@@ -164,6 +164,7 @@
     <ClInclude Include="include\SoundListener.hpp" />
     <ClInclude Include="include\RayTracer.h" />
     <ClInclude Include="include\SoundInfo.hpp" />
+    <ClInclude Include="include\SynchronizedThreadGroup.hpp" />
     <ClInclude Include="include\TracerEngine.hpp" />
     <ClInclude Include="include\TracerVisualizer.hpp" />
     <ClInclude Include="include\Vec2.h" />

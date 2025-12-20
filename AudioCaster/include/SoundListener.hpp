@@ -1,10 +1,12 @@
 #ifndef RAYLISTENER_H
 #define RAYLISTENER_H
 
-#include "Vec2.h"
 #include <unordered_map>
 #include <utility>
+
+#include "Vec2.h"
 #include "RayTracer.h"
+#include "SynchronizedThreadGroup.hpp"
 
 #define MAX_DETECTED 250	// miniaudio supports up to 254 channels
 #define THREAD_COUNT 8
@@ -15,16 +17,17 @@ private:
 	std::pair<Vec2, SoundInfo> detPairs[MAX_DETECTED];
 	std::unordered_map<std::string, Sound> loadedSounds;
 	RayTracer rayTracer;
+	SynchronizedThreadGroup threadGrp;
 	Vec2 pos;
-	float sampleSize = 25;
+	int sampleSize = 25;
 	float dTime = 0.0f;
 	int resolution = THREAD_COUNT;
 	int numDetected = 0;
 
-	void samplePixels(LineBuffer& objects, int start, int end);
-
 public:
 	
+	SoundListener(LineBuffer& objects, int numThreads);
+
 	~SoundListener();
 
 	/* Plays all the sounds detected by castRay(). */
@@ -50,7 +53,7 @@ public:
 	}
 
 	inline void incrementResolution(int increment) {
-		if (THREAD_COUNT <= resolution + increment && resolution + increment < MAX_DETECTED) resolution += increment;
+		if (threadGrp.getNumThreads() <= resolution + increment && resolution + increment < MAX_DETECTED) resolution += increment;
 	}
 
 	inline void setPosition(Vec2 position) {

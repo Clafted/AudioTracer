@@ -2,6 +2,9 @@
 
 #include "../include/TracerEngine.hpp"
 
+TracerEngine::TracerEngine() : listener(lB, 0) {}
+TracerEngine::TracerEngine(int numThreads) : listener(lB, numThreads){}
+
 int TracerEngine::loadMap(const char* file) {
 	if (vB.loadData(file) == -1) return -1;
 	lB.loadData(vB.vertices, vB.endOfVertices);

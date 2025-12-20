@@ -1,6 +1,31 @@
 #include "../include/SoundListener.hpp"
 #include <iostream>
 
+void samplePixels(LineBuffer& objects, 
+	std::pair<Vec2, SoundInfo>* detPairs, 
+	int start, 
+	int end,
+	Vec2& pos, 
+	RayTracer& rayTracer, 
+	int& sampleSize, 
+	int& resolution);
+
+SoundListener::SoundListener(LineBuffer& objects, int numThreads) : threadGrp(numThreads) {
+	for (int i = 0; i < numThreads; i++) {
+		threadGrp.assignTask(
+			i,
+			&samplePixels,
+			std::ref(objects),
+			std::ref(detPairs),
+			i * resolution / numThreads, 
+			std::min(resolution, (i+1) * resolution / numThreads),
+			std::ref(pos),
+			std::ref(rayTracer),
+			std::ref(sampleSize),
+			std::ref(resolution));
+	}
+}
+
 SoundListener::~SoundListener() {
 	clearDetected();
 	for (auto i = loadedSounds.begin(); i != loadedSounds.end(); i++) {
@@ -34,52 +59,34 @@ void SoundListener::playDetectedSounds() {
 
 void SoundListener::listen(LineBuffer& objects)
 {
-	/*SoundInfo s;
-	Vec2 d, p;
-	SoundInfo avg;
-	float theta;
-	int r;
-	int spp = */
 	if (sampleSize / resolution == 0) return;
-
 	rayTracer.resetTracer();
-	for (int i = 0; i < resolution; i++) {
-		samplePixels(objects, i, i + 1);
-	}
-
- //	for (int i = 0; i < sampleSize; i++) 
-	//{
-	//	// Accumulate rays
-	//	theta = 6.28f * i / sampleSize;
-	//	d = Vec2{ cos(theta), sin(theta) };
-	//	p = pos + d * 10.0f;
-	//	s = rayTracer.castRay(p, d, 3000.0f, 0.0f, 0, objects);
-	//	avg += s;
-	//	if ((i + 1) % spp != 0 || avg.empty()) continue;
-	//	// Average rays into one SoundInfo obj
-	//	avg /= spp;
-	//	r = i / spp;
-	//	theta = 6.28f * r / resolution;
-	//	detPairs[r] = { Vec2{ cos(theta), sin(theta) }, avg };
-	//	avg = { "", 0.0f };
-	//}
+	threadGrp.runGroup();
 }
 
-void SoundListener::samplePixels(LineBuffer& objects, int start, int end) {
+void samplePixels(LineBuffer& objects,
+	std::pair<Vec2, SoundInfo>* detPairs, 
+	int start, 
+	int end,
+	Vec2& pos, 
+	RayTracer& rayTracer, 
+	int& sampleSize, 
+	int& resolution) {
+
 	Vec2 direction, startPos;
 	SoundInfo sound;
 	float theta;
 	int spp = sampleSize / resolution;
-	for (int p = start; p < end; p++) {
-		theta = 6.28f * p * spp / resolution;
-		detPairs[p] = { Vec2{cos(theta), sin(theta)}, {}};
-		for (int i = p*spp; i < (p+1)*spp || (p+1 == resolution && i < sampleSize); i++) {
+	for (int pxl = start; pxl < end; pxl++) {
+		theta = 6.28f * pxl * spp / resolution;
+		detPairs[pxl] = { Vec2{cos(theta), sin(theta)}, {} };
+		for (int i = pxl*spp; (i < (pxl+1)*spp) || (pxl+1 == resolution && i < sampleSize); i++) {
 			theta = 6.28f * i / sampleSize;
 			direction = Vec2{ cos(theta), sin(theta) };
 			startPos = pos + direction * 10.0f;
-			detPairs[p].second += rayTracer.castRay(startPos, direction, 3000.0f, 0.0f, 0, objects);
+			detPairs[pxl].second += rayTracer.castRay(startPos, direction, 3000.0f, 0.0f, 0, objects);
 		}
-		detPairs[p].second /= spp;
+		detPairs[pxl].second /= (pxl + 1 == resolution) ? sampleSize - (pxl * spp) : spp;
 	}
 }
 

@@ -16,6 +16,9 @@ public:
 	SoundListener listener;
 	float currentTime, prevTime;
 
+	TracerEngine();
+	TracerEngine(int numThreads);
+
 	int loadMap(const char* path);
 	void listen();
 	void clearDetected();

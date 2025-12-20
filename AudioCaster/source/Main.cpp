@@ -10,12 +10,17 @@
 
 #include <iostream>
 
-TracerEngine tEng;
+TracerEngine tEng(8);
 TracerVisualizer tVis(tEng);
 
 void runBVH();
 void runTracer();
+/*
 
+
+RECORD THIS LOOOOOOOOOOOL
+
+*/
 int main(){
 	runTracer();
 	return 0;
