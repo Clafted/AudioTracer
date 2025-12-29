@@ -10,7 +10,7 @@
 
 #include <iostream>
 
-TracerEngine tEng(8);
+TracerEngine tEng(12);
 TracerVisualizer tVis(tEng);
 
 void runBVH();
@@ -85,10 +85,13 @@ void runTracer() {
 		if (IsKeyDown(KEY_A)) tVis.moveCamera(-1, 0);
 		if (IsKeyDown(KEY_D)) tVis.moveCamera(1, 0);
 
+		BeginDrawing();
+		ClearBackground(BACKGROUND_COLOR);
 		// Render sound and visuals
 		tEng.listen();
 		tVis.drawFrame();
 		tEng.clearDetected();
+		EndDrawing();
 	}
 
 	CloseAudioDevice();

@@ -2,83 +2,58 @@
 
 #include <thread>
 #include <iostream>
-#include <stdexcept>
-#include <mutex>
-#include <chrono>
+#include <atomic>
 
 class SynchronizedThreadGroup {
 	
-	int numThreads;
-	bool wait, destroyThreads;
+	const int numThreads;
+	std::atomic<bool>* finishFlags;
 	std::thread* threads;
+
+	std::atomic<bool> wait, destroyThreads;
 
 public:
 
-	std::mutex finishedMtx;
-	int finishedCounter;
+	SynchronizedThreadGroup(int numThreads);
 
-	SynchronizedThreadGroup(int numThreads) : numThreads(numThreads) {
-		finishedCounter = 0;
-		wait = true;
-		destroyThreads = false;
-		threads = (std::thread*)calloc(numThreads, sizeof(std::thread));
-		if (threads == nullptr) {
-			throw std::runtime_error("FAILED TO ALLOCATE MEMORY FOR SYNC_THRD_GRP");
-		}
-	}
-
-	~SynchronizedThreadGroup() {
-		destroyThreads = true;
-		for (int i = 0; i < numThreads; i++) {
-			threads[i].join();
-		}
-		delete threads;
-	}
+	~SynchronizedThreadGroup();
 	
 	inline int getNumThreads() {
 		return numThreads;
 	}
 
-	inline int getNumFinished() {
-		return finishedCounter;
-	}
-
 	inline bool shouldWait() {
-		return wait;
+		return wait.load();
 	}
 
 	inline bool shouldDestroyThreads() {
-		return destroyThreads;
+		return destroyThreads.load();
 	}
 
-	inline void runGroup() {
-		finishedMtx.lock();
-		finishedCounter = 0;
-		finishedMtx.unlock();
-		wait = false;
-		while (true) {
-			finishedMtx.lock();
-			if (finishedCounter >= numThreads) {
-				finishedMtx.unlock();
-				break;
-			}
-			finishedMtx.unlock();
-		};
-		wait = true;
+	inline bool threadsShouldWaitForFinish() {
+		return !wait.load() && !destroyThreads.load();
 	}
 
+	inline bool threadsShouldWaitForStart() {
+		return wait.load() && !destroyThreads.load();
+	}
 
+	void runGroup();
+	
 	template <class F, class... Args>
 	void assignTask(int target, F&& f, Args&&... args) {
-		threads[target] = std::thread([](SynchronizedThreadGroup& manager, F&& f, Args&&... args) {
-			while (!manager.shouldDestroyThreads()) {
-				if (manager.shouldWait()) continue;
-				f(args...);
-				manager.finishedMtx.lock();
-				manager.finishedCounter++;
-				manager.finishedMtx.unlock();
-				while (!manager.shouldWait() && !manager.shouldDestroyThreads()) {};
-			}
-		}, std::ref(*this), f, args...);
+		threads[target] = std::thread(
+			[] (SynchronizedThreadGroup& manager, std::atomic<bool>* flag, F&& f, Args&&... args) {
+				std::cout << "CREATED THREAD_" << std::this_thread::get_id() << "\n";
+				while (!manager.shouldDestroyThreads()) {
+					while (manager.threadsShouldWaitForStart());
+					flag->store(false);
+					f(args...);
+					flag->store(true);
+					while (manager.threadsShouldWaitForFinish());
+				}
+				std::cout << "EXITING THREAD_" << std::this_thread::get_id() << "\n";
+			}, 
+			std::ref(*this), &finishFlags[target], f, args...);
 	}
 };

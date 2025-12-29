@@ -151,6 +151,7 @@
     <ClCompile Include="source\Main.cpp" />
     <ClCompile Include="source\SoundListener.cpp" />
     <ClCompile Include="source\RayTracer.cpp" />
+    <ClCompile Include="source\SynchronizedThreadGroup.cpp" />
     <ClCompile Include="source\TracerEngine.cpp" />
     <ClCompile Include="source\TracerVisualizer.cpp" />
     <ClCompile Include="source\VertexBuffer.cpp" />

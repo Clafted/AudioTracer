@@ -27,17 +27,17 @@ struct Vec2
 		return a.x * b.x + a.y * b.y;
 	}
 
-	inline Vec2 operator+(const Vec2 &other)
+	inline Vec2 operator+(const Vec2 &other) const
 	{
 		return Vec2{ x + other.x, y + other.y };
 	}
 
-	inline Vec2 operator-(const Vec2 &other)
+	inline Vec2 operator-(const Vec2 &other) const
 	{
 		return Vec2{ x - other.x, y - other.y };
 	}
 
-	inline Vec2 operator*(const float &a)
+	inline Vec2 operator*(const float &a) const
 	{
 		return Vec2{ a * x, a * y };
 	}

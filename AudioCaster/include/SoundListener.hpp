@@ -3,7 +3,7 @@
 
 #include <unordered_map>
 #include <utility>
-
+#include <mutex>
 #include "Vec2.h"
 #include "RayTracer.h"
 #include "SynchronizedThreadGroup.hpp"
@@ -16,7 +16,6 @@ private:
 
 	std::pair<Vec2, SoundInfo> detPairs[MAX_DETECTED];
 	std::unordered_map<std::string, Sound> loadedSounds;
-	RayTracer rayTracer;
 	SynchronizedThreadGroup threadGrp;
 	Vec2 pos;
 	int sampleSize = 25;
@@ -25,6 +24,8 @@ private:
 	int numDetected = 0;
 
 public:
+
+	static std::mutex lock;
 	
 	SoundListener(LineBuffer& objects, int numThreads);
 
@@ -49,7 +50,7 @@ public:
 	}
 
 	inline void incrementMaxBounces(int increment) {
-		if (0 < rayTracer.maxBounces + increment) rayTracer.maxBounces += increment;
+		if (0 < RayTracer::maxBounces + increment) RayTracer::maxBounces += increment;
 	}
 
 	inline void incrementResolution(int increment) {
@@ -73,11 +74,11 @@ public:
 	}
 
 	inline int getMaxBounces() {
-		return rayTracer.maxBounces;
+		return RayTracer::maxBounces;
 	}
 
 	inline int getNumRays() {
-		return rayTracer.numRays;
+		return RayTracer::numRays;
 	}
 
 	inline int getResolution() {

@@ -93,12 +93,12 @@ struct LineObject
 		return sqrt( (p1.x-p2.x)*(p1.x-p2.x) + (p1.y-p2.y)*(p1.y-p2.y) );
 	}
 	
-	bool containsPoint(const Vec2 &p) {
+	bool containsPoint(const Vec2 &p) const {
 		return getLength(start, p) + getLength(p, end) - length < 0.5f;
 	}
 
 
-	void move(Vec2 displacement){
+	void move(const Vec2 displacement){
 		start += displacement;
 		end += displacement;
 	}
