@@ -25,7 +25,7 @@ private:
 
 public:
 
-	static std::mutex lock;
+	std::mutex lock;
 	
 	SoundListener(LineBuffer& objects, int numThreads);
 

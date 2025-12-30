@@ -1,15 +1,11 @@
 #include "../include/SoundListener.hpp"
 #include <iostream>
 
-std::mutex SoundListener::lock;
-
-void samplePixels(const LineBuffer& objects, 
-	std::pair<Vec2, SoundInfo>* detPairs, 
-	int start, 
-	int end,
-	Vec2& pos,
-	int& sampleSize, 
-	int& resolution);
+void samplePixels(
+	SoundListener& config,
+	LineBuffer& objects,
+	std::pair<Vec2, SoundInfo>* dest,
+	int start, int end);
 
 SoundListener::SoundListener(LineBuffer& objects, int numThreads) : threadGrp(numThreads) {
 	if (numThreads > resolution) resolution = numThreads;
@@ -17,13 +13,11 @@ SoundListener::SoundListener(LineBuffer& objects, int numThreads) : threadGrp(nu
 		threadGrp.assignTask(
 			i,
 			&samplePixels,
+			std::ref(*this),
 			std::ref(objects),
 			std::ref(detPairs),
-			i * resolution / numThreads, 
-			std::min(resolution, (i+1) * resolution / numThreads),
-			std::ref(pos),
-			std::ref(sampleSize),
-			std::ref(resolution));
+			i * resolution / numThreads,
+			std::min(resolution, (i + 1) * resolution / numThreads));
 	}
 }
 
@@ -65,36 +59,34 @@ void SoundListener::listen(LineBuffer& objects)
 	threadGrp.runGroup();
 }
 
-void samplePixels(const LineBuffer& objects,
-	std::pair<Vec2, SoundInfo>* detPairs, 
+void samplePixels(SoundListener& config,
+	LineBuffer& objects,
+	std::pair<Vec2, SoundInfo>* dest,
 	int start, 
-	int end,
-	Vec2& pos,
-	int& sampleSize, 
-	int& resolution) {
+	int end) {
 
 	Vec2 direction, startPos;
 	SoundInfo sound;
 	float theta;
 
-	SoundListener::lock.lock();
-	Vec2 cur_pos = pos;
-	int cur_sampleSize = sampleSize;
-	int cur_resolution = resolution;
-	SoundListener::lock.unlock();
+	config.lock.lock();
+	Vec2 cur_pos = config.getPosition();
+	int cur_sampleSize = config.getSampleSize();
+	int cur_resolution = config.getResolution();
+	config.lock.unlock();
 
 	int spp = cur_sampleSize / cur_resolution;
 	for (int pxl = start; pxl < end; pxl++) {
 		theta = 6.28f * pxl / cur_resolution;
-		detPairs[pxl] = { Vec2{cos(theta), sin(theta)}, SoundInfo()};
+		dest[pxl] = { Vec2{cos(theta), sin(theta)}, SoundInfo()};
 		for (int i = pxl*spp; (i < (pxl+1)*spp) || (pxl+1 == cur_resolution && i < cur_sampleSize); i++) {
 			theta = 6.28f * i / cur_sampleSize;
 			direction = Vec2{ cos(theta), sin(theta) };
 			startPos = cur_pos + direction * 10.0f;
-			detPairs[pxl].second += RayTracer::castRay(startPos, direction, 3000.0f, 0.0f, 0, objects);
+			dest[pxl].second += RayTracer::castRay(startPos, direction, 3000.0f, 0.0f, 0, objects);
 		}
-		if (pxl + 1 != cur_resolution) detPairs[pxl].second /= spp;
-		else detPairs[pxl].second /= cur_sampleSize - (pxl*spp);
+		if (pxl + 1 != cur_resolution) dest[pxl].second /= spp;
+		else dest[pxl].second /= cur_sampleSize - (pxl*spp);
 	}
 }
 

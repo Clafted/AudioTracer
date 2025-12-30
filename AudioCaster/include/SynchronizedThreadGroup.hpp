@@ -42,18 +42,19 @@ public:
 	
 	template <class F, class... Args>
 	void assignTask(int target, F&& f, Args&&... args) {
+		if (threads[target].joinable()) threads[target].join();
 		threads[target] = std::thread(
-			[] (SynchronizedThreadGroup& manager, std::atomic<bool>* flag, F&& f, Args&&... args) {
+			[] (SynchronizedThreadGroup& manager, std::atomic<bool>& flag, F&& f, Args&&... args) {
 				std::cout << "CREATED THREAD_" << std::this_thread::get_id() << "\n";
 				while (!manager.shouldDestroyThreads()) {
 					while (manager.threadsShouldWaitForStart());
-					flag->store(false);
+					flag.store(false);
 					f(args...);
-					flag->store(true);
+					flag.store(true);
 					while (manager.threadsShouldWaitForFinish());
 				}
 				std::cout << "EXITING THREAD_" << std::this_thread::get_id() << "\n";
 			}, 
-			std::ref(*this), &finishFlags[target], f, args...);
+			std::ref(*this), std::ref(finishFlags[target]), f, args...);
 	}
 };
