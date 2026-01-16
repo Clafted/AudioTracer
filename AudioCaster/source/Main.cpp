@@ -5,22 +5,22 @@
 #include "../include/TracerEngine.hpp"
 #include "../include/TracerVisualizer.hpp"
 #include "../include/BoundingVolumeHierarchy.h"
-#include <thread>
-#define VERTEX_FILE "resources/plan.csv"
 
 #include <iostream>
+#include <chrono>
+#define VERTEX_FILE "resources/plan.csv"
+#define NUM_THREADS 1
 
-TracerEngine tEng(12);
+TracerEngine tEng(NUM_THREADS);
 TracerVisualizer tVis(tEng);
+
+float totalFPS = 0;
+int numFrames = 0;
+int totalRays = 0;
 
 void runBVH();
 void runTracer();
-/*
 
-
-RECORD THIS LOOOOOOOOOOOL
-
-*/
 int main(){
 	runTracer();
 	return 0;
@@ -36,7 +36,7 @@ void runBVH() {
 	vB.loadData(VERTEX_FILE);
 	lB.loadData(vB.vertices, vB.endOfVertices);
 	
-	std::cout << "\Before sort:" << std::endl;
+	std::cout << "\nBefore sort:" << std::endl;
 	for (int i = 0; i < lB.lineCount; i++) {
 		std::cout << (lB.lines[i].start.y + lB.lines[i].end.y) / 2 << ", ";
 	}
@@ -48,6 +48,7 @@ void runBVH() {
 }
 
 void runTracer() {
+
 	SoundListener& player = tEng.listener;
 
 	// Initialize Raylib
@@ -65,6 +66,7 @@ void runTracer() {
 	LineObject& snd2 = tEng.lB.lines[tEng.addObject(LineObject(Vec2{ 400, 400 }, 40, "resources/bottle.mp3"))];
 	LineObject& head = tEng.lB.lines[tEng.addObject(LineObject(Vec2(player.getPosition().x - 12.0f, player.getPosition().y + 30.0f), Vec2(player.getPosition().x + 12.0f, player.getPosition().y + 30.0f)))];
 
+	auto start = std::chrono::high_resolution_clock::now();
 	while (!WindowShouldClose())
 	{
 		head.move((Vec2)GetMousePosition() - player.getPosition());
@@ -87,13 +89,26 @@ void runTracer() {
 
 		BeginDrawing();
 		ClearBackground(BACKGROUND_COLOR);
+		
 		// Render sound and visuals
 		tEng.listen();
 		tVis.drawFrame();
 		tEng.clearDetected();
 		EndDrawing();
+
+		totalRays += tEng.listener.getNumRays();
+		numFrames++;
 	}
+	auto end = std::chrono::high_resolution_clock::now();
 
 	CloseAudioDevice();
 	CloseWindow();
+
+	float elapsedTime = std::chrono::duration<double>(end - start).count();
+	std::cout << "\n\nSTATISTICS:"
+			<< "\nElapsed time(sec): " << elapsedTime
+			<< "\nAvg FPS: " << numFrames / elapsedTime
+			<< "\nAvg frame-time (ms): " << 1000.0f * elapsedTime / numFrames
+			<< "\nAvg # of rays per frame: " << totalRays / numFrames 
+		<< "\n\n" << std::endl;
 }

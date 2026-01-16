@@ -1,13 +1,17 @@
 #pragma once
 
+#include <atomic>
 #include "LineBuffer.hpp"
 #include "Vec2.h"
 
-static class RayTracer {
+
+#define DRAW_RAYS true
+
+class RayTracer {
 
 public:
 
-	static int numRays;
+	static std::atomic_int numRays;
 	static int maxBounces;
 
 	/* Casts a ray from origin s, in direction d, with length t,
@@ -24,7 +28,7 @@ public:
 
 
 	static inline void resetTracer() {
-		numRays = 0;
+		numRays.store(0);
 	}
 
 
@@ -79,8 +83,10 @@ private:
 		const LineObject& sound, 
 		float currentTime, 
 		float rayLength, 
-		const Vec2& s, 
-		const LineObject cL, 
+		const Vec2& s,
+#if DRAW_RAYS == true
+		LineObject cL,
+#endif
 		float p);
 
 

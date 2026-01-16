@@ -18,7 +18,7 @@ void TracerVisualizer::moveCamera(int x, int y) {
 void TracerVisualizer::drawStats() {
 	std::string t;
 	SoundListener& l = engine.listener;
-	t = "FPS: " + std::to_string((int)(1.0f / ((float)GetTime() - engine.prevTime)));
+	t = "FPS: " + std::to_string((int)engine.getFPS());
 	DrawText(t.c_str(), 10, 10, FONT_SIZE, WHITE);
 	DrawText(("Resolution [Q/E]: " + std::to_string(l.getResolution())).c_str(),
 		10, 10 + 1 * LINE_HEIGHT, FONT_SIZE, WHITE);
@@ -28,7 +28,7 @@ void TracerVisualizer::drawStats() {
 		10, 10 + 3 * LINE_HEIGHT, FONT_SIZE, WHITE);
 	DrawText(("Num bounces [LEFT/RIGHT]: " + std::to_string((int)l.getMaxBounces())).c_str(),
 		10, 10 + 4 * LINE_HEIGHT, FONT_SIZE, WHITE);
-	DrawText(("Num rays: " + std::to_string((int)l.getNumRays())).c_str(),
+	DrawText(("Num rays: " + std::to_string(l.getNumRays())).c_str(),
 		10, 10 + 5 * LINE_HEIGHT, FONT_SIZE, WHITE);
 	
 }

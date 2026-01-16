@@ -6,19 +6,19 @@
 
 class SynchronizedThreadGroup {
 	
-	const int numThreads;
-	std::atomic<bool>* finishFlags;
-	std::thread* threads;
+	const size_t numThreads = 0;
+	std::atomic_bool* finishFlags = nullptr;
+	std::thread* threads = nullptr;
 
-	std::atomic<bool> wait, destroyThreads;
+	std::atomic_bool wait, destroyThreads;
 
 public:
 
-	SynchronizedThreadGroup(int numThreads);
+	SynchronizedThreadGroup(size_t numThreads);
 
 	~SynchronizedThreadGroup();
 	
-	inline int getNumThreads() {
+	inline size_t getNumThreads() {
 		return numThreads;
 	}
 
@@ -44,7 +44,11 @@ public:
 	void assignTask(int target, F&& f, Args&&... args) {
 		if (threads[target].joinable()) threads[target].join();
 		threads[target] = std::thread(
-			[] (SynchronizedThreadGroup& manager, std::atomic<bool>& flag, F&& f, Args&&... args) {
+			[] (SynchronizedThreadGroup& manager, 
+				std::atomic_bool& flag, 
+				F&& f,
+				Args&&... args) {
+
 				std::cout << "CREATED THREAD_" << std::this_thread::get_id() << "\n";
 				while (!manager.shouldDestroyThreads()) {
 					while (manager.threadsShouldWaitForStart());
@@ -54,7 +58,12 @@ public:
 					while (manager.threadsShouldWaitForFinish());
 				}
 				std::cout << "EXITING THREAD_" << std::this_thread::get_id() << "\n";
+
 			}, 
-			std::ref(*this), std::ref(finishFlags[target]), f, args...);
+			std::ref(*this), 
+			std::ref(finishFlags[target]), 
+			f, 
+			args...
+		);
 	}
 };

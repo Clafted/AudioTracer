@@ -13,20 +13,16 @@
 
 class TracerVisualizer {
 
-	bool showStats;
-	bool showDetected;
-	bool showObjects;
+	bool showStats = true;
+	bool showDetected = true;
+	bool showObjects = true;
 
 public:
 
 	TracerEngine& engine;
-	Camera2D camera;
+	Camera2D camera = { 0,0,0,0 };
 
 	TracerVisualizer(TracerEngine& engine) : engine(engine) {
-		showStats = true;
-		showDetected = true;
-		showObjects = true;
-		camera = { 0, 0, 0, 0 };
 		camera.zoom = 1.0f;
 	}
 

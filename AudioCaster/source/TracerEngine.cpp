@@ -17,6 +17,7 @@ void TracerEngine::listen() {
 	}
 	currentTime = GetTime();
 	listener.listen(lB);
+	deltaTime = currentTime - prevTime;
 	prevTime = currentTime;
 	listener.playDetectedSounds();
 }

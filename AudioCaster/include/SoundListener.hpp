@@ -14,13 +14,13 @@
 class SoundListener {
 private:
 
-	std::pair<Vec2, SoundInfo> detPairs[MAX_DETECTED];
-	std::unordered_map<std::string, Sound> loadedSounds;
+	std::pair<Vec2, SoundInfo> detPairs[MAX_DETECTED] = {};
+	std::unordered_map<std::string, Sound> loadedSounds = {};
 	SynchronizedThreadGroup threadGrp;
-	Vec2 pos;
+	Vec2 pos = { 0, 0 };
 	int sampleSize = 25;
 	float dTime = 0.0f;
-	int resolution = THREAD_COUNT;
+	int resolution = 0;
 	int numDetected = 0;
 
 public:
@@ -78,7 +78,7 @@ public:
 	}
 
 	inline int getNumRays() {
-		return RayTracer::numRays;
+		return RayTracer::numRays.load();
 	}
 
 	inline int getResolution() {

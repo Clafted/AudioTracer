@@ -6,7 +6,7 @@
 /* A wrapper class for raylib's Vector2 class*/
 struct Vec2
 {
-	Vector2 v;
+	Vector2 v = { 0.0f, 0.0f };
 	float& x = v.x;
 	float& y = v.y;
 

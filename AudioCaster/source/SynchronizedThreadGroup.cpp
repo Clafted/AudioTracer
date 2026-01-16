@@ -2,14 +2,14 @@
 
 #include "../include/SynchronizedThreadGroup.hpp"
 
-SynchronizedThreadGroup::SynchronizedThreadGroup(int numThreads) : numThreads(numThreads) {
+SynchronizedThreadGroup::SynchronizedThreadGroup(size_t numThreads) : numThreads(numThreads) {
 	wait.store(true);
 	destroyThreads.store(false);
-	threads = (std::thread*)calloc(numThreads, sizeof(std::thread));
+	threads = new std::thread[numThreads];
 	if (threads == nullptr) {
 		throw std::runtime_error("FAILED TO ALLOCATE MEMORY FOR SYNC_THRD_GRP");
 	}
-	finishFlags = (std::atomic<bool>*)calloc(numThreads, sizeof(std::atomic<bool>));
+	finishFlags = new std::atomic_bool[numThreads];
 	if (finishFlags == nullptr) {
 		throw std::runtime_error("FAILED TO ALLOCATE MEMORY FOR SYNC_THRD_GRP");
 	}
@@ -20,20 +20,15 @@ SynchronizedThreadGroup::~SynchronizedThreadGroup() {
 	for (int i = 0; i < numThreads; i++) {
 		if (threads[i].joinable()) threads[i].join();
 	}
-	delete threads;
-	delete finishFlags;
 }
 
 void SynchronizedThreadGroup::runGroup() {
 	bool allFinished = false;
+	int counter = 0;
 	wait.store(false);
-	while (!allFinished) {
-		allFinished = true;
-		for (int i = 0; i < numThreads; i++) {
-			if (finishFlags[i].load()) continue;
-			allFinished = false;
-			break;
-		}
+	while (counter < numThreads) {
+		if (true == finishFlags[counter].load()) counter++;
+		else counter = 0;
 	}
 	wait.store(true);
 }
