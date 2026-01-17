@@ -3,30 +3,32 @@
 #include <atomic>
 #include "DrawCall.h"
 
-#define MAX_CALLS_PER_FRAME 100000
+#define MAX_CALLS_PER_FRAME 10000
 
+/*Class to concurrently store raylib calls to DrawLine(). Thread-safe.*/
 class DrawCallBuffer {
+
 	DrawCall calls[MAX_CALLS_PER_FRAME] = {};
 	std::atomic_int count = 0, head = 0;
 
 public:
 
 	void addCall(const DrawCall& call) {
-		if (count >= MAX_CALLS_PER_FRAME) return;
+		if (count.load() >= MAX_CALLS_PER_FRAME) return;
 		calls[count++] = call;
 	}
 
 
-	bool isEmpty() {
-		return count == 0;
+	inline bool isEmpty() {
+		return count.load() == 0;
 	}
 
-	bool hasNextCall() {
-		return head < count;
+	inline bool hasNextCall() {
+		return head.load() < count.load();
 	}
 	
-	int getCallCount() {
-		return count;
+	inline int getCallCount() {
+		return count.load();
 	}
 
 	DrawCall getNextCall() {
@@ -35,7 +37,7 @@ public:
 	}
 
 	void reset() {
-		count = 0;
-		head = 0;
+		count.store(0);
+		head.store(0);
 	}
 };

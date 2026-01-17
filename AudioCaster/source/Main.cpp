@@ -57,6 +57,7 @@ void runTracer() {
 	int sHeight = (int)(GetScreenHeight() * 0.7f);
 	SetWindowSize(sWidth, sHeight);
 	SetWindowPosition((int)(GetScreenHeight() * 0.15f), (int)(GetScreenWidth() * 0.15f));
+	SetConfigFlags(FLAG_MSAA_4X_HINT);
 	InitAudioDevice();
 
 	tEng.loadMap(VERTEX_FILE);
