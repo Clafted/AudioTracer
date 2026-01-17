@@ -1,17 +1,18 @@
 #include "../include/SoundListener.hpp"
 #include <iostream>
 
-#include <assert.h>
 
 void samplePixels(
 	SoundListener& config,
 	LineBuffer& objects,
+	DrawCallBuffer& drawBuffer,
 	std::pair<Vec2, SoundInfo>* dest,
 	int start, 
 	int end);
 
 
-SoundListener::SoundListener(LineBuffer& objects, int numThreads) : threadGrp(numThreads), detPairs() {
+SoundListener::SoundListener(LineBuffer& objects, DrawCallBuffer& drawBuffer, int numThreads) : threadGrp(numThreads), detPairs() {
+	
 	clearDetected();
 	resolution = numThreads;
 	resolution = 20;
@@ -23,6 +24,7 @@ SoundListener::SoundListener(LineBuffer& objects, int numThreads) : threadGrp(nu
 			&samplePixels,
 			std::ref(*this),
 			std::ref(objects),
+			std::ref(drawBuffer),
 			std::ref(detPairs),
 			i*pixelsPerThread, 
 			((i+1)*pixelsPerThread >= resolution) 
@@ -85,6 +87,7 @@ void accumulateSamples(
 	unsigned int maxSamples,
 	Vec2 pos,
 	LineBuffer& objects,
+	DrawCallBuffer& drawBuffer,
 	SoundInfo& dest) {
 
 	Vec2 direction, castPos;
@@ -94,7 +97,7 @@ void accumulateSamples(
 		theta = 6.28f * i / maxSamples;
 		direction = Vec2(cos(theta), sin(theta));
 		castPos = pos + direction * 10.0f;
-		dest += RayTracer::castRay(castPos, direction, 3000.0f, 0.0f, 0, objects);
+		dest += RayTracer::castRay(castPos, direction, 3000.0f, 0.0f, 0, objects, drawBuffer);
 	}
 
 }
@@ -102,6 +105,7 @@ void accumulateSamples(
 void samplePixels(
 	SoundListener& config,
 	LineBuffer& objects,
+	DrawCallBuffer& drawBuffer,
 	std::pair<Vec2, SoundInfo>* dest,
 	int start, 
 	int end) {
@@ -131,7 +135,8 @@ void samplePixels(
 			endSample, 
 			cur_sampleSize,
 			cur_pos, 
-			objects, 
+			objects,
+			drawBuffer,
 			dest[pxl].second);
 
 		float divisor = spp; 

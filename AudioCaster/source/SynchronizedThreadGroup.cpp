@@ -23,12 +23,24 @@ SynchronizedThreadGroup::~SynchronizedThreadGroup() {
 }
 
 void SynchronizedThreadGroup::runGroup() {
-	bool allFinished = false;
-	int counter = 0;
+	resetFlags();
 	wait.store(false);
+	waitForThreadsToFinish();
+	wait.store(true);
+}
+
+void SynchronizedThreadGroup::resetFlags() {
+	for (int i = 0; i < numThreads; i++) {
+		finishFlags[i].store(false);
+	}
+}
+
+void SynchronizedThreadGroup::waitForThreadsToFinish() {
+	bool allFinished = false;
+	int counter = 0, idx = 0;
 	while (counter < numThreads) {
-		if (true == finishFlags[counter].load()) counter++;
+		if (true == finishFlags[idx].load()) counter++;
 		else counter = 0;
 	}
-	wait.store(true);
+	++idx = idx % 12;
 }
