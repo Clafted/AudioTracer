@@ -7,6 +7,7 @@
 #include "Vec2.h"
 #include "RayTracer.h"
 #include "SynchronizedThreadGroup.hpp"
+#include "DrawCallBuffer.h"
 
 #define MAX_DETECTED 250	// miniaudio supports up to 254 channels
 #define THREAD_COUNT 8
@@ -27,7 +28,7 @@ public:
 
 	std::mutex lock;
 	
-	SoundListener(LineBuffer& objects, int numThreads);
+	SoundListener(LineBuffer& objects, DrawCallBuffer& drawBuffer, int numThreads);
 
 	~SoundListener();
 
@@ -40,8 +41,6 @@ public:
 	/* Listens for sounds from a buffer of objects
 	* objects, with elapsed time dTime. */
 	void listen(LineBuffer& objects);
-
-
 
 	/* INLINE FUNCIONS */
 

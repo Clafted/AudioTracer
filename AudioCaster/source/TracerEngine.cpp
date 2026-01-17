@@ -2,8 +2,8 @@
 
 #include "../include/TracerEngine.hpp"
 
-TracerEngine::TracerEngine() : listener(lB, 0) {}
-TracerEngine::TracerEngine(int numThreads) : listener(lB, numThreads){}
+TracerEngine::TracerEngine() : listener(lB, drawBuffer, 0) {}
+TracerEngine::TracerEngine(int numThreads) : listener(lB, drawBuffer, numThreads){}
 
 int TracerEngine::loadMap(const char* file) {
 	if (vB.loadData(file) == -1) return -1;

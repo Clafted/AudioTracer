@@ -31,6 +31,7 @@ public:
 	void moveCamera(int x, int y);
 
 	void drawStats();
+	void drawBuffer();
 	void drawDetected();
 	void drawObjects();
 	void drawFrame();

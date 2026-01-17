@@ -162,6 +162,8 @@
     <ClInclude Include="include\BoundingVolumeHierarchy.h" />
     <ClInclude Include="include\Buffer.hpp" />
     <ClInclude Include="include\BVHNode.h" />
+    <ClInclude Include="include\DrawCall.h" />
+    <ClInclude Include="include\DrawCallBuffer.h" />
     <ClInclude Include="include\LineBuffer.hpp" />
     <ClInclude Include="include\LineObject.hpp" />
     <ClInclude Include="include\SoundListener.hpp" />
