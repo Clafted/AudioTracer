@@ -17,6 +17,7 @@ SoundListener::SoundListener(LineBuffer& objects, DrawCallBuffer& drawBuffer, in
 	resolution = numThreads;
 	resolution = 20;
 	sampleSize = 140;
+
 	int pixelsPerThread = (int)ceil(resolution / numThreads);
 	for (int i = 0; i < numThreads; i++) {
 		threadGrp.assignTask(
