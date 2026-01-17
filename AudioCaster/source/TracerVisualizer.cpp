@@ -15,6 +15,15 @@ void TracerVisualizer::moveCamera(int x, int y) {
 	camera.offset.y += y;
 }
 
+void TracerVisualizer::drawBuffer() {
+	while (engine.drawBuffer.hasNextCall()) {
+		DrawCall call = engine.drawBuffer.getNextCall();
+		DrawLine(call.getStart().x, call.getStart().y,
+				call.getEnd().x, call.getEnd().y,
+				call.getColor());
+	}
+}
+
 void TracerVisualizer::drawStats() {
 	std::string t;
 	SoundListener& l = engine.listener;
@@ -42,6 +51,7 @@ void TracerVisualizer::drawDetected()
 	int screenHeight = GetScreenHeight();
 	int yTemp;
 	std::string text;
+	
 	// VOLUME AXIS
 	for (int i = 1; i <= 10; i++) {
 		yTemp = screenHeight + RADIAN_BAR_Y_OFFSET - screenHeight * 0.9 * i / 10;
@@ -50,6 +60,7 @@ void TracerVisualizer::drawDetected()
 		DrawText(text.c_str(), 20, yTemp - LINE_HEIGHT + 10, FONT_SIZE, AXIS_COLOR);
 	}
 	yTemp = screenHeight + RADIAN_BAR_Y_OFFSET;
+	
 	// HISTOGRAM
 	for (int i = 0; i < resolution; i++) {
 		volume = engine.listener.getDetectedPairs()[i].second.volume;
@@ -61,6 +72,7 @@ void TracerVisualizer::drawDetected()
 			renderHeight,
 			PINK);
 	}
+	
 	// RADIAN AXIS
 	DrawLine(0, yTemp, GetScreenWidth(), yTemp, AXIS_COLOR);
 	for (int i = 0; i < 10; i++) {

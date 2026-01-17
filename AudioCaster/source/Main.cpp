@@ -9,7 +9,7 @@
 #include <iostream>
 #include <chrono>
 #define VERTEX_FILE "resources/plan.csv"
-#define NUM_THREADS 1
+#define NUM_THREADS 10
 
 TracerEngine tEng(NUM_THREADS);
 TracerVisualizer tVis(tEng);
@@ -57,6 +57,7 @@ void runTracer() {
 	int sHeight = (int)(GetScreenHeight() * 0.7f);
 	SetWindowSize(sWidth, sHeight);
 	SetWindowPosition((int)(GetScreenHeight() * 0.15f), (int)(GetScreenWidth() * 0.15f));
+	SetConfigFlags(FLAG_MSAA_4X_HINT);
 	InitAudioDevice();
 
 	tEng.loadMap(VERTEX_FILE);
@@ -92,8 +93,11 @@ void runTracer() {
 		
 		// Render sound and visuals
 		tEng.listen();
+
+		tVis.drawBuffer();
 		tVis.drawFrame();
 		tEng.clearDetected();
+		tEng.drawBuffer.reset();
 		EndDrawing();
 
 		totalRays += tEng.listener.getNumRays();

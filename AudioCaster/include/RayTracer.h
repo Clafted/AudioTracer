@@ -1,11 +1,9 @@
 #pragma once
 
 #include <atomic>
+#include "DrawCallBuffer.h"
 #include "LineBuffer.hpp"
 #include "Vec2.h"
-
-
-#define DRAW_RAYS true
 
 class RayTracer {
 
@@ -24,7 +22,8 @@ public:
 		float t, 
 		float cT, 
 		int numBounces, 
-		const LineBuffer& objects);
+		const LineBuffer& objects,
+		DrawCallBuffer& drawBuffer);
 
 
 	static inline void resetTracer() {
@@ -84,9 +83,8 @@ private:
 		float currentTime, 
 		float rayLength, 
 		const Vec2& s,
-#if DRAW_RAYS == true
 		LineObject cL,
-#endif
+		DrawCallBuffer& drawBuffer,
 		float p);
 
 
@@ -94,6 +92,7 @@ private:
 		const LineObject& wall,
 		const LineObject& rayToWall,
 		const LineBuffer& objects,
+		DrawCallBuffer& drawBuffer,
 		const Vec2& rayDirection,
 		float lengthToWall,
 		float remainingRayLength,

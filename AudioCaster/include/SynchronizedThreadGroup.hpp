@@ -12,6 +12,9 @@ class SynchronizedThreadGroup {
 
 	std::atomic_bool wait, destroyThreads;
 
+	void resetFlags();
+	void waitForThreadsToFinish();
+
 public:
 
 	SynchronizedThreadGroup(size_t numThreads);
@@ -52,7 +55,6 @@ public:
 				std::cout << "CREATED THREAD_" << std::this_thread::get_id() << "\n";
 				while (!manager.shouldDestroyThreads()) {
 					while (manager.threadsShouldWaitForStart());
-					flag.store(false);
 					f(args...);
 					flag.store(true);
 					while (manager.threadsShouldWaitForFinish());

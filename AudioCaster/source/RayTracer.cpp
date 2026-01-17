@@ -37,18 +37,24 @@ const LineObject* RayTracer::findClosestObject(const Vec2& s, const Vec2& d, flo
 	return &objects.lines[closestIdx];
 }
 
-SoundInfo RayTracer::castRay(const Vec2& s, const Vec2& d, float t, float cT, int numBounces, const LineBuffer& objects) {
+SoundInfo RayTracer::castRay(
+	const Vec2& s, 
+	const Vec2& d, 
+	float t, 
+	float cT, 
+	int numBounces, 
+	const LineBuffer& objects,
+	DrawCallBuffer& drawBuffer) {
+
 	if (numBounces >= maxBounces) return SoundInfo{};
-	numRays.fetch_add(1);
+	numRays++;
 	float closestDistance;
 	const LineObject* closestObject = findClosestObject(s, d, t, objects, closestDistance);
 	if (!closestObject || closestDistance == -1.0f || t < closestDistance) {
 
-#if DRAW_RAYS == true
-		lock.lock();
-		DrawLine((int)s.x, (int)s.y, (int)s.x + d.x * t, (int)s.y + d.y * t, Color{ 255, 50, 50, 40 });
-		lock.unlock();
-#endif
+		drawBuffer.addCall(DrawCall(Vec2((int)s.x, (int)s.y), 
+									Vec2((int)s.x + d.x * t, (int)s.y + d.y * t), 
+									Color{ 255, 50, 50, 40 }));
 
 		return SoundInfo{};
 	}
@@ -56,18 +62,15 @@ SoundInfo RayTracer::castRay(const Vec2& s, const Vec2& d, float t, float cT, in
 	float rayLength = cT + closestDistance;
 	float volume = getVolumeWithFalloff(t + cT, rayLength);
 	return (closestObject->type == SOUND)
-#if DRAW_RAYS == true
-		? getSoundEmitted(*closestObject, GetTime(), rayLength, s, lineToClosestObject, volume)
-#else
-		? getSoundEmitted(*closestObject, GetTime(), rayLength, s, volume)
-#endif
-		: getWallBouncedSound(*closestObject, lineToClosestObject, objects, d, closestDistance, t, cT, numBounces, volume);
+		? getSoundEmitted(*closestObject, GetTime(), rayLength, s, lineToClosestObject, drawBuffer, volume)
+		: getWallBouncedSound(*closestObject, lineToClosestObject, objects, drawBuffer, d, closestDistance, t, cT, numBounces, volume);
 }
 
 SoundInfo RayTracer::getWallBouncedSound(
 	const LineObject& wall,
 	const LineObject& rayToWall,
 	const LineBuffer& objects,
+	DrawCallBuffer& drawBuffer,
 	const Vec2& rayDirection,
 	float lengthToWall,
 	float remainingRayLength,
@@ -75,11 +78,9 @@ SoundInfo RayTracer::getWallBouncedSound(
 	int numBounces,
 	float fallOff) {
 
-#if DRAW_RAYS == true
-	lock.lock();
-	DrawLine(rayToWall.start.x, rayToWall.start.y, rayToWall.end.x, rayToWall.end.y, Color{ 40, 140, 250, (unsigned char)(fallOff * 255) });
-	lock.unlock();
-#endif
+	drawBuffer.addCall(DrawCall(Vec2(rayToWall.start.x, rayToWall.start.y), 
+								Vec2(rayToWall.end.x, rayToWall.end.y), 
+								Color{ 40, 140, 250, (unsigned char)(fallOff * 255) }));
 
 	Vec2 normal = wall.normal;
 	float dP = Vec2::dot(rayDirection, normal);
@@ -88,8 +89,8 @@ SoundInfo RayTracer::getWallBouncedSound(
 		dP *= -1;
 	}
 	Vec2 reflection = rayDirection - normal * (2 * dP);
-	SoundInfo reflS = castRay(rayToWall.end, reflection, remainingRayLength - lengthToWall, totalRayLength, numBounces + 1, objects);
-	SoundInfo refrS = castRay(rayToWall.end, rayDirection, remainingRayLength - lengthToWall, totalRayLength, numBounces + 1, objects);
+	SoundInfo reflS = castRay(rayToWall.end, reflection, remainingRayLength - lengthToWall, totalRayLength, numBounces + 1, objects, drawBuffer);
+	SoundInfo refrS = castRay(rayToWall.end, rayDirection, remainingRayLength - lengthToWall, totalRayLength, numBounces + 1, objects, drawBuffer);
 	return reflS * wall.reflection + refrS * wall.refraction;
 }
 
@@ -98,16 +99,13 @@ SoundInfo RayTracer::getSoundEmitted(
 	float currentTime,
 	float rayLength,
 	const Vec2& s,
-#if DRAW_RAYS == true
 	LineObject cL,
-#endif
+	DrawCallBuffer& drawBuffer,
 	float p) {
 
-#if DRAW_RAYS == true
-	lock.lock();
-	DrawLine((int)s.x, (int)s.y, (int)cL.end.x, (int)cL.end.y, Color{ 200, 200, 100, (unsigned char)(p * 255) });
-	lock.unlock();
-#endif
+	drawBuffer.addCall(DrawCall(Vec2((int)s.x, (int)s.y), 
+								Vec2((int)cL.end.x, (int)cL.end.y), 
+								Color{ 200, 200, 100, (unsigned char)(p * 255) }));
 
 	EmittedSound emittedSound;
 	for (int i = 0; i < sound.numActive; i++) {
@@ -115,11 +113,9 @@ SoundInfo RayTracer::getSoundEmitted(
 		if (cantHearSound(emittedSound.first, currentTime - emittedSound.second, rayLength / SOUND_SPEED)) continue;
 		emittedSound.first.volume = p;
 
-#if DRAW_RAYS == true
-		lock.lock();
-		DrawLine((int)s.x, (int)s.y, (int)cL.end.x, (int)cL.end.y, GREEN);
-		lock.unlock();
-#endif
+		drawBuffer.addCall(DrawCall(Vec2((int)s.x, (int)s.y), 
+									Vec2((int)cL.end.x, (int)cL.end.y), 
+									GREEN));
 
 		return emittedSound.first;
 	}
