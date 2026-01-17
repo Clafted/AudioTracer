@@ -7,6 +7,8 @@ https://github.com/user-attachments/assets/9fb9c13f-1591-4f20-9cc0-5fc506fc54f6
 - [Inspiration](#inspiration-)
 - [Controls](#controls-)
 - [Development Progress](#development-progress-%EF%B8%8F)
+  - [Multithreading](#multithreading)
+  - [Ray-tracing Optimizations](#ray-tracing-optimizations)
   - [Material-based Rendering](#material-based-rendering)
   - [2D Sound](#2d-sound)
 
@@ -28,6 +30,13 @@ I have always thought of implementing ray-tracing, but never got to it until now
 
  
 ## Development Progress ☑️
+### Multithreading
+Real-time ray-tracing is infeasible within a single-threaded application. Thus there becomes a necessity for more processing power.
+#### Solutions
+<u>Mutlithreading/Concurrency</u> is the way to go. Confining the sampling algorithm to a single thread is incredibly limiting and fails to harness many available resources. Since the ray-traced samples are independent of one another, these samples can be delegated to multiple threads with the assurance of zero-conflicts between thread calculations.
+#### Progress
+- Functional multithreaded sampling AND rendering is currently supported. There is flickering/inconsistencies in ray counts that will be addressed
+
 ### Ray-Tracing Optimizations
 It seems the ray-tracing algorithm needs to be improved. Although current performance seems fast, there is likely great potential for
 further improvement in the algorithm. Thus I'm seeking optimizations to the basic algorithm.
@@ -38,6 +47,8 @@ The resulting structure is a tree of large bounding volumes, each containing sma
 At the most basic level are the geometry, where rays would finally be tested for collision. The benefit of BVH is that rays can
 first test collision with the largest bounding volumes, and--if there is no collision--conclude that none of the geometry contained
 in said bounding volume will collide with it. Thus, numerous ray-geometry collisions are skipped, saving time and resources.
+#### Progress
+- WIP
 
 ### Material-based rendering
 Having a working prototype, I hope to further improve the performance, possibly by some 
@@ -48,6 +59,8 @@ is to support the use of different *materials*; akin to light ray-tracing--in wh
 material properties which influence how much sound reflects, refracts, or is absorbed.
 - <u>16/10/2025</u> Currently all lines have the same material, as the engine only stores positional data,
 not yet material data
+#### Progress
+- Yet to begin (YTB) as of Jan 17, 2026
 
 ### 2D Sound
 Currently, AudioTracer renders positional sound on a single axis ("1D audio"), left-to-right.
@@ -61,3 +74,5 @@ which utilizes a recipe of volume and panning configurations to simulate 3D audi
 Thus I hope to replicate this technique to acheive 2D audio.
 #### Useful resources
 - [How 3D sound is simulated with 2 speakers](https://catalyst-magazine.org/articles/the-science-behind-3d-sound/)
+#### Progress
+- YTB Jan 17, 2026
