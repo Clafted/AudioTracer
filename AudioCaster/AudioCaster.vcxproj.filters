@@ -54,6 +54,9 @@
     <ClCompile Include="source\BoundingVolumeHierarchy.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\SynchronizedThreadGroup.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Buffer.hpp">
@@ -90,6 +93,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\BoundingVolumeHierarchy.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SynchronizedThreadGroup.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\DrawCall.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\DrawCallBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

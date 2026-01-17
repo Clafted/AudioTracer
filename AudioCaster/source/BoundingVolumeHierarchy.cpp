@@ -5,11 +5,11 @@ void BoundingVolumeHierarchy::sortObjectsByXAxis(LineObject* objects, int numObj
 	LineObject temp;
 	for (int i = 0; i < numObjects; i++) {
 		lowestIdx = i;
-		lowestVal = (axis == X) 
+		lowestVal = (int)(axis == X) 
 					? (objects[i].start.x + objects[i].end.x) / 2
 					: (objects[i].start.y + objects[i].end.y) / 2;
 		for (int j = i + 1; j < numObjects; j++) {
-			jVal = (axis == X) 
+			jVal = (int)(axis == X) 
 					? (objects[j].start.x + objects[j].end.x) / 2 
 					: (objects[j].start.y + objects[j].end.y) / 2;
 			if (jVal >= lowestVal) continue;

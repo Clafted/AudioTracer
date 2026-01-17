@@ -10,7 +10,7 @@
 
 struct VertexBuffer : public Buffer
 {
-	Vec2 vertices[MAX_VERTEX_COUNT]; // The vertex data of a loaded file
+	Vec2 vertices[MAX_VERTEX_COUNT] = {}; // The vertex data of a loaded file
 	int endOfVertices = 0; // 1 + index of the last element in vertices
 
 	void parseStringToFloatArray(char str[MAX_FILE_LENGTH], float dest[MAX_VERTEX_COUNT], int& floatCount);

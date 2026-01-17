@@ -2,6 +2,9 @@
 
 #include "../include/TracerEngine.hpp"
 
+TracerEngine::TracerEngine() : listener(lB, drawBuffer, 0) {}
+TracerEngine::TracerEngine(int numThreads) : listener(lB, drawBuffer, numThreads){}
+
 int TracerEngine::loadMap(const char* file) {
 	if (vB.loadData(file) == -1) return -1;
 	lB.loadData(vB.vertices, vB.endOfVertices);
@@ -13,7 +16,8 @@ void TracerEngine::listen() {
 		sound->deleteOldSounds();
 	}
 	currentTime = GetTime();
-	listener.listen(lB, currentTime - prevTime);
+	listener.listen(lB);
+	deltaTime = currentTime - prevTime;
 	prevTime = currentTime;
 	listener.playDetectedSounds();
 }

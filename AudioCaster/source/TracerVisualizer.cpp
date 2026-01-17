@@ -15,11 +15,19 @@ void TracerVisualizer::moveCamera(int x, int y) {
 	camera.offset.y += y;
 }
 
-void TracerVisualizer::drawStats()
-{
+void TracerVisualizer::drawBuffer() {
+	while (engine.drawBuffer.hasNextCall()) {
+		DrawCall call = engine.drawBuffer.getNextCall();
+		DrawLine(call.getStart().x, call.getStart().y,
+				call.getEnd().x, call.getEnd().y,
+				call.getColor());
+	}
+}
+
+void TracerVisualizer::drawStats() {
 	std::string t;
 	SoundListener& l = engine.listener;
-	t = "FPS: " + std::to_string((int)(1.0f / ((float)GetTime() - engine.prevTime)));
+	t = "FPS: " + std::to_string((int)engine.getFPS());
 	DrawText(t.c_str(), 10, 10, FONT_SIZE, WHITE);
 	DrawText(("Resolution [Q/E]: " + std::to_string(l.getResolution())).c_str(),
 		10, 10 + 1 * LINE_HEIGHT, FONT_SIZE, WHITE);
@@ -29,7 +37,7 @@ void TracerVisualizer::drawStats()
 		10, 10 + 3 * LINE_HEIGHT, FONT_SIZE, WHITE);
 	DrawText(("Num bounces [LEFT/RIGHT]: " + std::to_string((int)l.getMaxBounces())).c_str(),
 		10, 10 + 4 * LINE_HEIGHT, FONT_SIZE, WHITE);
-	DrawText(("Num rays: " + std::to_string((int)l.getNumRays())).c_str(),
+	DrawText(("Num rays: " + std::to_string(l.getNumRays())).c_str(),
 		10, 10 + 5 * LINE_HEIGHT, FONT_SIZE, WHITE);
 	
 }
@@ -43,18 +51,18 @@ void TracerVisualizer::drawDetected()
 	int screenHeight = GetScreenHeight();
 	int yTemp;
 	std::string text;
+	
 	// VOLUME AXIS
-	for (int i = 1; i <= 10; i++)
-	{
+	for (int i = 1; i <= 10; i++) {
 		yTemp = screenHeight + RADIAN_BAR_Y_OFFSET - screenHeight * 0.9 * i / 10;
 		text = std::to_string(i * 10) + "%";
 		DrawLine(0, yTemp, GetScreenWidth(), yTemp, AXIS_COLOR);
 		DrawText(text.c_str(), 20, yTemp - LINE_HEIGHT + 10, FONT_SIZE, AXIS_COLOR);
 	}
 	yTemp = screenHeight + RADIAN_BAR_Y_OFFSET;
+	
 	// HISTOGRAM
-	for (int i = 0; i < resolution; i++)
-	{
+	for (int i = 0; i < resolution; i++) {
 		volume = engine.listener.getDetectedPairs()[i].second.volume;
 		if (volume <= 0.0) continue;
 		renderHeight = screenHeight * volume * 0.9;
@@ -64,6 +72,7 @@ void TracerVisualizer::drawDetected()
 			renderHeight,
 			PINK);
 	}
+	
 	// RADIAN AXIS
 	DrawLine(0, yTemp, GetScreenWidth(), yTemp, AXIS_COLOR);
 	for (int i = 0; i < 10; i++) {
@@ -90,17 +99,16 @@ void TracerVisualizer::drawObjects()
 	int sHeight = GetScreenHeight();
 	for (LineObject l : engine.lB.lines)
 	{
-		if (l.type == WALL)
-		{
+		if (l.type == WALL) {
 			DrawLine(l.start.x,l.start.y,
 				l.end.x,l.end.y,
 				Color{ (unsigned char)abs(2*255*l.start.x/sWidth), 
 						(unsigned char)abs(2*255*l.start.y/sHeight), 
 						100,
-						(unsigned char)(255 * (1.0f - l.absorption)) });
+						(unsigned char)(255 * (1.0f - l.absorption))
+				});
 		}
-		else
-		{
+		else {
 			DrawCircle(l.start.x, l.start.y, l.radius, YELLOW);
 			for (int j = 0; j < l.numActive; j++)
 			{
@@ -116,12 +124,10 @@ void TracerVisualizer::drawObjects()
 }
 
 void TracerVisualizer::drawFrame() {
-	BeginDrawing();
-	ClearBackground(BACKGROUND_COLOR);
+	
 	BeginMode2D(camera);
 	if (showObjects) drawObjects();
 	EndMode2D();
 	if (showStats) drawStats();
 	if (showDetected) drawDetected();
-	EndDrawing();
 }

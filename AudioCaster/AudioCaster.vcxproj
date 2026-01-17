@@ -51,6 +51,7 @@
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+    <EnableASAN>false</EnableASAN>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -122,13 +123,14 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -151,6 +153,7 @@
     <ClCompile Include="source\Main.cpp" />
     <ClCompile Include="source\SoundListener.cpp" />
     <ClCompile Include="source\RayTracer.cpp" />
+    <ClCompile Include="source\SynchronizedThreadGroup.cpp" />
     <ClCompile Include="source\TracerEngine.cpp" />
     <ClCompile Include="source\TracerVisualizer.cpp" />
     <ClCompile Include="source\VertexBuffer.cpp" />
@@ -159,11 +162,14 @@
     <ClInclude Include="include\BoundingVolumeHierarchy.h" />
     <ClInclude Include="include\Buffer.hpp" />
     <ClInclude Include="include\BVHNode.h" />
+    <ClInclude Include="include\DrawCall.h" />
+    <ClInclude Include="include\DrawCallBuffer.h" />
     <ClInclude Include="include\LineBuffer.hpp" />
     <ClInclude Include="include\LineObject.hpp" />
     <ClInclude Include="include\SoundListener.hpp" />
     <ClInclude Include="include\RayTracer.h" />
     <ClInclude Include="include\SoundInfo.hpp" />
+    <ClInclude Include="include\SynchronizedThreadGroup.hpp" />
     <ClInclude Include="include\TracerEngine.hpp" />
     <ClInclude Include="include\TracerVisualizer.hpp" />
     <ClInclude Include="include\Vec2.h" />

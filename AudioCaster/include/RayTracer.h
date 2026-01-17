@@ -1,5 +1,7 @@
 #pragma once
 
+#include <atomic>
+#include "DrawCallBuffer.h"
 #include "LineBuffer.hpp"
 #include "Vec2.h"
 
@@ -7,23 +9,25 @@ class RayTracer {
 
 public:
 
-	int numRays = 0;
-	int maxBounces = 4;
+	static std::atomic_int numRays;
+	static int maxBounces;
 
 	/* Casts a ray from origin s, in direction d, with length t,
 	* max-length cT, with numBounces bounces, from a buffer of
 	* objects objects.
 	* Returns a SoundInfo object of the resulting sound. */
-	SoundInfo castRay(Vec2& s, 
-		Vec2& d, 
+	static SoundInfo castRay(
+		const Vec2& s, 
+		const Vec2& d, 
 		float t, 
 		float cT, 
 		int numBounces, 
-		LineBuffer& objects);
+		const LineBuffer& objects,
+		DrawCallBuffer& drawBuffer);
 
 
-	inline void resetTracer() {
-		numRays = 0;
+	static inline void resetTracer() {
+		numRays.store(0);
 	}
 
 
@@ -34,7 +38,7 @@ private:
 	* line line, and max parameter t.
 	* Returns a positive parameter for existing collision,
 	* -1.0f otherwise. */
-	float getLineHit(Vec2& s, Vec2& d, LineObject& line, float t);
+	static float getLineHit(const Vec2& s, const Vec2& d, const LineObject& line, float t);
 
 
 	/* Find the parameter of collision between a parametric line
@@ -42,15 +46,15 @@ private:
 	* sound, and max parameter t.
 	* Returns a positive parameter for existing collision,
 	* -1.0f otherwise. */
-	float getSoundHit(Vec2& s, Vec2& d, LineObject& sound, float rayLength);
+	static float getSoundHit(const Vec2& s, const Vec2& d, const LineObject& sound, float rayLength);
 
 
-	inline float getObjectHit(Vec2& s, Vec2& d, LineObject& object, float& t) {
+	static inline float getObjectHit(const Vec2& s, const Vec2& d, const LineObject& object, float& t) {
 		return (object.type == WALL) ? getLineHit(s, d, object, t) : getSoundHit(s, d, object, t);
 	}
 
 
-	inline float getVolumeWithFalloff(float maxRayLength, float currentRayLength) {
+	static inline float getVolumeWithFalloff(float maxRayLength, float currentRayLength) {
 		return std::min(1.0f, 0.01f * (maxRayLength * maxRayLength) / (currentRayLength * currentRayLength));
 	}
 
@@ -59,33 +63,37 @@ private:
 	* sound, given the active-time of sound soundActiveTime, and
 	* of active-time of ray rayActiveTime.
 	* Returns true if ray is within sound, false otherwise. */
-	inline bool rayInSound(float soundActiveTime, float rayActiveTime) {
+	static inline bool rayInSound(float soundActiveTime, float rayActiveTime) {
 		return abs(soundActiveTime - rayActiveTime) <= 0.005f;
 	}
 
 
-	inline bool currentClosestIsShorter(float& currentClosest, float& compare) {
+	static inline bool currentClosestIsShorter(float& currentClosest, float& compare) {
 		return compare <= 0.1f || (currentClosest != -1.0f && currentClosest <= compare);
 	}
 
 
-	inline bool cantHearSound(SoundInfo& sound, float soundActiveTime, float rayActiveTime) {
+	static inline bool cantHearSound(const SoundInfo& sound, float soundActiveTime, float rayActiveTime) {
 		return sound.volume <= 0.0f || !rayInSound(soundActiveTime, rayActiveTime);
 	}
 
 
-	SoundInfo getSoundEmitted(LineObject& sound, 
+	static SoundInfo getSoundEmitted(
+		const LineObject& sound, 
 		float currentTime, 
 		float rayLength, 
-		Vec2& s, 
-		LineObject cL, 
+		const Vec2& s,
+		LineObject cL,
+		DrawCallBuffer& drawBuffer,
 		float p);
 
 
-	SoundInfo getWallBouncedSound(LineObject& wall,
-		LineObject& rayToWall,
-		LineBuffer& objects,
-		Vec2& rayDirection,
+	static SoundInfo getWallBouncedSound(
+		const LineObject& wall,
+		const LineObject& rayToWall,
+		const LineBuffer& objects,
+		DrawCallBuffer& drawBuffer,
+		const Vec2& rayDirection,
 		float lengthToWall,
 		float remainingRayLength,
 		float totalRayLength,
@@ -99,10 +107,11 @@ private:
 	* and closestDist, where closestDist is updated to parameter
 	* for closest collision.
 	* Returns a pointer to the closest object if any, nullptr otherwise. */
-	LineObject* findClosestObject(Vec2& s, 
-		Vec2& d, 
+	static const LineObject* findClosestObject(
+		const Vec2& s, 
+		const Vec2& d, 
 		float t, 
-		LineBuffer& objects, 
+		const LineBuffer& objects, 
 		float& closestDist);
 
 };

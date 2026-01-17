@@ -1,27 +1,35 @@
 #ifndef RAYLISTENER_H
 #define RAYLISTENER_H
 
-#include "Vec2.h"
 #include <unordered_map>
 #include <utility>
+#include <mutex>
+#include "Vec2.h"
 #include "RayTracer.h"
+#include "SynchronizedThreadGroup.hpp"
+#include "DrawCallBuffer.h"
 
 #define MAX_DETECTED 250	// miniaudio supports up to 254 channels
+#define THREAD_COUNT 8
 
 class SoundListener {
 private:
 
-	std::pair<Vec2, SoundInfo> detPairs[MAX_DETECTED];
-	std::unordered_map<std::string, Sound> loadedSounds;
-	RayTracer rayTracer;
-	Vec2 pos;
-	float sampleSize = 25;
+	std::pair<Vec2, SoundInfo> detPairs[MAX_DETECTED] = {};
+	std::unordered_map<std::string, Sound> loadedSounds = {};
+	SynchronizedThreadGroup threadGrp;
+	Vec2 pos = { 0, 0 };
+	int sampleSize = 25;
 	float dTime = 0.0f;
-	int resolution = 20;
+	int resolution = 0;
 	int numDetected = 0;
 
 public:
+
+	std::mutex lock;
 	
+	SoundListener(LineBuffer& objects, DrawCallBuffer& drawBuffer, int numThreads);
+
 	~SoundListener();
 
 	/* Plays all the sounds detected by castRay(). */
@@ -32,18 +40,20 @@ public:
 
 	/* Listens for sounds from a buffer of objects
 	* objects, with elapsed time dTime. */
-	void listen(LineBuffer& objects, float dTime);
+	void listen(LineBuffer& objects);
+
+	/* INLINE FUNCIONS */
 
 	inline void incrementSampleSize(int increment) {
 		if (10 < sampleSize + increment) sampleSize += increment;
 	}
 
 	inline void incrementMaxBounces(int increment) {
-		if (0 < rayTracer.maxBounces + increment) rayTracer.maxBounces += increment;
+		if (0 < RayTracer::maxBounces + increment) RayTracer::maxBounces += increment;
 	}
 
 	inline void incrementResolution(int increment) {
-		if (30 < resolution + increment && resolution + increment < MAX_DETECTED) resolution += increment;
+		if (threadGrp.getNumThreads() <= resolution + increment && resolution + increment < MAX_DETECTED) resolution += increment;
 	}
 
 	inline void setPosition(Vec2 position) {
@@ -63,11 +73,11 @@ public:
 	}
 
 	inline int getMaxBounces() {
-		return rayTracer.maxBounces;
+		return RayTracer::maxBounces;
 	}
 
 	inline int getNumRays() {
-		return rayTracer.numRays;
+		return RayTracer::numRays.load();
 	}
 
 	inline int getResolution() {
