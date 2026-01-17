@@ -9,7 +9,7 @@
 #include <iostream>
 #include <chrono>
 #define VERTEX_FILE "resources/plan.csv"
-#define NUM_THREADS 10
+#define NUM_THREADS 8
 
 TracerEngine tEng(NUM_THREADS);
 TracerVisualizer tVis(tEng);

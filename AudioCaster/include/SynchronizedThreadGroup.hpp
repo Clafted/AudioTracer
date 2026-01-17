@@ -3,7 +3,7 @@
 #include <thread>
 #include <iostream>
 #include <atomic>
-
+#include <string>
 class SynchronizedThreadGroup {
 	
 	const size_t numThreads = 0;
@@ -13,7 +13,7 @@ class SynchronizedThreadGroup {
 	std::atomic_bool wait, destroyThreads;
 
 	void resetFlags();
-	void waitForThreadsToFinish();
+	void waitForThreadsToFinish() const;
 
 public:
 

@@ -35,12 +35,11 @@ void SynchronizedThreadGroup::resetFlags() {
 	}
 }
 
-void SynchronizedThreadGroup::waitForThreadsToFinish() {
-	bool allFinished = false;
+void SynchronizedThreadGroup::waitForThreadsToFinish() const {
 	int counter = 0, idx = 0;
 	while (counter < numThreads) {
 		if (true == finishFlags[idx].load()) counter++;
 		else counter = 0;
+		idx = (idx + 1) % numThreads;
 	}
-	++idx = idx % 12;
 }
