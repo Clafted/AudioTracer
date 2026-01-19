@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../include/SynchronizedThreadGroup.hpp"
+#include "../include/SynchronizedThreadGroup.hpp";
 
 SynchronizedThreadGroup::SynchronizedThreadGroup(size_t numThreads) : numThreads(numThreads) {
 	wait.store(true);
@@ -35,11 +35,25 @@ void SynchronizedThreadGroup::resetFlags() {
 	}
 }
 
+
 void SynchronizedThreadGroup::waitForThreadsToFinish() const {
-	int counter = 0, idx = 0;
+	int counter = 0;
+	auto start = std::chrono::high_resolution_clock::now();
+	auto current = std::chrono::high_resolution_clock::now();
+	float elapsedTime = std::chrono::duration<double, std::milli>(current-start).count();
+
 	while (counter < numThreads) {
-		if (true == finishFlags[idx].load()) counter++;
-		else counter = 0;
-		idx = (idx + 1) % numThreads;
+		if (true == finishFlags[counter].load()) counter++;
+
+		current = std::chrono::high_resolution_clock::now();
+		elapsedTime = std::chrono::duration<double, std::milli>(current - start).count();
+		if (elapsedTime >= MAX_FRAME_TIME_MS) {
+			std::string message = "\nWARNING: SYNCTHRDGRP TIMEOUT\n";
+			for (int i = 0; i < numThreads; i++) {
+				message += "\tTHREAD_" + std::to_string(i) + ": " + (finishFlags[i].load() ? "FINISHED\n" : "NOT FINISHED\n");
+			}
+			std::cerr << message;
+			break;
+		}
 	}
 }
