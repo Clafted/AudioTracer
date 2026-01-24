@@ -8,8 +8,10 @@
 
 #include <iostream>
 #include <chrono>
+
 #define VERTEX_FILE "resources/plan.csv"
 #define NUM_THREADS 8
+#define PLAYER_SPEED 0.2f
 
 TracerEngine tEng(NUM_THREADS);
 TracerVisualizer tVis(tEng);
@@ -68,11 +70,11 @@ void runTracer() {
 	LineObject& head = tEng.lB.lines[tEng.addObject(LineObject(Vec2(player.getPosition().x - 12.0f, player.getPosition().y + 30.0f), Vec2(player.getPosition().x + 12.0f, player.getPosition().y + 30.0f)))];
 
 	auto start = std::chrono::high_resolution_clock::now();
+	Vec2 movement, cameraMovement;
 	while (!WindowShouldClose())
 	{
-		head.move((Vec2)GetMousePosition() - player.getPosition());
-		player.setPosition(GetMousePosition());
-		snd.start = player.getPosition();
+		movement = Vec2{ 0.0f, 0.0f };
+		cameraMovement = Vec2{ 0.0f, 0.0f };
 
 		// Process inputs
 		if (IsKeyPressed(KEY_SPACE)) snd.playSound();
@@ -83,22 +85,28 @@ void runTracer() {
 		if (IsKeyPressed(KEY_RIGHT)) player.incrementMaxBounces(1);
 		if (IsKeyPressed(KEY_Q)) player.incrementResolution(-20);
 		if (IsKeyPressed(KEY_E)) player.incrementResolution(20);
-		if (IsKeyDown(KEY_W)) tVis.moveCamera(0, -1);
-		if (IsKeyDown(KEY_S)) tVis.moveCamera(0, 1);
-		if (IsKeyDown(KEY_A)) tVis.moveCamera(-1, 0);
-		if (IsKeyDown(KEY_D)) tVis.moveCamera(1, 0);
+		if (IsKeyDown(KEY_W)) movement.y -= PLAYER_SPEED;
+		if (IsKeyDown(KEY_S)) movement.y += PLAYER_SPEED;
+		if (IsKeyDown(KEY_A)) movement.x -= PLAYER_SPEED;
+		if (IsKeyDown(KEY_D)) movement.x += PLAYER_SPEED;
 
-		BeginDrawing();
-		ClearBackground(BACKGROUND_COLOR);
+		if (IsKeyDown(KEY_I)) cameraMovement.y -= PLAYER_SPEED;
+		if (IsKeyDown(KEY_K)) cameraMovement.y += PLAYER_SPEED;
+		if (IsKeyDown(KEY_J)) cameraMovement.x -= PLAYER_SPEED;
+		if (IsKeyDown(KEY_L)) cameraMovement.x += PLAYER_SPEED;
+		if (IsKeyDown(KEY_U)) tVis.cameraChangeZoom(0.005f);
+		if (IsKeyDown(KEY_O)) tVis.cameraChangeZoom(-0.005f);
 		
+		tVis.moveCamera(cameraMovement.x, cameraMovement.y);
+		head.move(movement);
+		snd.start = player.getPosition();
+		player.setPosition(player.getPosition() + movement);
+
 		// Render sound and visuals
 		tEng.listen();
-
-		tVis.drawBuffer();
-		tVis.drawFrame();
+		tVis.draw();
 		tEng.clearDetected();
 		tEng.drawBuffer.reset();
-		EndDrawing();
 
 		totalRays += tEng.listener.getNumRays();
 		numFrames++;
@@ -114,5 +122,5 @@ void runTracer() {
 			<< "\nAvg FPS: " << numFrames / elapsedTime
 			<< "\nAvg frame-time (ms): " << 1000.0f * elapsedTime / numFrames
 			<< "\nAvg # of rays per frame: " << totalRays / numFrames 
-		<< "\n\n" << std::endl;
+			<< "\n\n" << std::endl;
 }

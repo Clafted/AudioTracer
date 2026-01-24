@@ -4,13 +4,7 @@
 
 #include "../include/TracerVisualizer.hpp"
 
-void TracerVisualizer::updateConfiguration(bool showStats, bool showDetected, bool showObjects) {
-	this->showStats = showStats;
-	this->showDetected = showDetected;
-	this->showObjects = showObjects;
-}
-
-void TracerVisualizer::moveCamera(int x, int y) {
+void TracerVisualizer::moveCamera(float x, float y) {
 	camera.offset.x += x;
 	camera.offset.y += y;
 }
@@ -84,34 +78,22 @@ void TracerVisualizer::drawDetected()
 	}
 }
 
-void TracerVisualizer::drawObjects()
-{
-	if (SHOW_UNITS) {
-		for (int i = 1; i < GetScreenWidth(); i += 50) {
-			DrawLine(i, 0, i, GetScreenHeight(), GRID_COLOR);
-		}
-		for (int i = 1; i < GetScreenHeight(); i += 50) {
-			DrawLine(0, i, GetScreenWidth(), i, GRID_COLOR);
-		}
-	}
-
+void TracerVisualizer::drawObjects() {
 	int sWidth = GetScreenWidth();
 	int sHeight = GetScreenHeight();
-	for (LineObject l : engine.lB.lines)
-	{
+	for (LineObject l : engine.lB.lines) {
 		if (l.type == WALL) {
 			DrawLine(l.start.x,l.start.y,
 				l.end.x,l.end.y,
-				Color{ (unsigned char)abs(2*255*l.start.x/sWidth), 
-						(unsigned char)abs(2*255*l.start.y/sHeight), 
-						100,
+				Color{ (unsigned char)(abs(50*l.start.x/sWidth) + 205), 
+						(unsigned char)(abs(50*l.start.y/sHeight) + 205), 
+						200,
 						(unsigned char)(255 * (1.0f - l.absorption))
 				});
 		}
 		else {
 			DrawCircle(l.start.x, l.start.y, l.radius, YELLOW);
-			for (int j = 0; j < l.numActive; j++)
-			{
+			for (int j = 0; j < l.numActive; j++) {
 				if (l.activeSounds[j].first.volume <= 0.0f) continue;
 				DrawCircleLines(l.start.x,
 					l.start.y,
@@ -123,11 +105,14 @@ void TracerVisualizer::drawObjects()
 	DrawCircle((int)engine.listener.getPosition().x, (int)engine.listener.getPosition().y, 10, GREEN);
 }
 
-void TracerVisualizer::drawFrame() {
-	
-	BeginMode2D(camera);
-	if (showObjects) drawObjects();
-	EndMode2D();
-	if (showStats) drawStats();
-	if (showDetected) drawDetected();
+void TracerVisualizer::draw() {
+	BeginDrawing();
+		ClearBackground(BACKGROUND_COLOR);
+		BeginMode2D(camera);
+			if (showBuffer) drawBuffer();
+			if (showObjects) drawObjects();
+		EndMode2D();
+		if (showStats) drawStats();
+		if (showDetected) drawDetected();
+	EndDrawing();
 }

@@ -9,13 +9,23 @@
 #define BACKGROUND_COLOR Color{5, 10, 15}
 #define AXIS_COLOR Color{ 255, 255, 255, 70}
 #define GRID_COLOR Color{ 220, 220, 220, 20}
-#define SHOW_UNITS true
+
+#define OBJECTS 0x1
+#define DETECTED 0x2
+#define BUFFER 0x4
+#define STATS 0x8
 
 class TracerVisualizer {
 
-	bool showStats = true;
 	bool showDetected = true;
+	bool showBuffer = true;
 	bool showObjects = true;
+	bool showStats = true;
+
+	void drawStats();
+	void drawBuffer();
+	void drawDetected();
+	void drawObjects();
 
 public:
 
@@ -26,13 +36,16 @@ public:
 		camera.zoom = 1.0f;
 	}
 
-	void updateConfiguration(bool showStats, bool showDetected, bool showObjects);
+	void updateConfiguration(unsigned int configFlags) {
+		showDetected = (configFlags & DETECTED) != 0;
+		showBuffer = (configFlags & BUFFER) != 0;
+		showObjects = (configFlags & OBJECTS) != 0;
+		showStats = (configFlags & STATS) != 0;
+	}
 
-	void moveCamera(int x, int y);
-
-	void drawStats();
-	void drawBuffer();
-	void drawDetected();
-	void drawObjects();
-	void drawFrame();
+	void draw();
+	inline void cameraChangeZoom(float zoomIncrement) {
+		camera.zoom += zoomIncrement;
+	}
+	void moveCamera(float x, float y);
 };
