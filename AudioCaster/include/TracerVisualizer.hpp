@@ -44,8 +44,9 @@ public:
 	}
 
 	void draw();
-	inline void cameraChangeZoom(float zoomIncrement) {
-		camera.zoom += zoomIncrement;
-	}
 	void moveCamera(float x, float y);
+	
+	inline void cameraChangeZoom(float zoomFactor) {
+		camera.zoom *= zoomFactor;
+	}
 };

@@ -148,8 +148,7 @@ void samplePixels(
 	}
 }
 
-void SoundListener::clearDetected()
-{
+void SoundListener::clearDetected() {
 	for (int i = 0; i < resolution; i++) {
 		detPairs[i].first = Vec2(0.0f);
 		detPairs[i].second.clear();

@@ -9,6 +9,10 @@
 
 class TracerEngine {
 
+	int numFrames = 0;
+	int totalRays = 0;
+	std::chrono::steady_clock::time_point start = std::chrono::high_resolution_clock::now();;
+
 public:
 
 	std::vector<LineObject*> soundSources = {};
@@ -21,6 +25,7 @@ public:
 
 	TracerEngine();
 	TracerEngine(int numThreads);
+	~TracerEngine();
 
 	int loadMap(const char* path);
 	void listen();

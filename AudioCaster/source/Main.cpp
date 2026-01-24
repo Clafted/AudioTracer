@@ -10,28 +10,23 @@
 #include <chrono>
 
 #define VERTEX_FILE "resources/plan.csv"
-#define NUM_THREADS 8
+#define NUM_THREADS 4
 #define PLAYER_SPEED 0.2f
 
+BoundingVolumeHierarchy bvh;
 TracerEngine tEng(NUM_THREADS);
 TracerVisualizer tVis(tEng);
-
-float totalFPS = 0;
-int numFrames = 0;
-int totalRays = 0;
+VertexBuffer vB;
+LineBuffer lB;
+BVHNode* root = nullptr;
 
 void runBVH();
 void runTracer();
 
-int main(){
+int main() {
 	runTracer();
 	return 0;
 }
-
-VertexBuffer vB;
-LineBuffer lB;
-BoundingVolumeHierarchy bvh;
-BVHNode* root = nullptr;
 
 void runBVH() {
 
@@ -50,31 +45,33 @@ void runBVH() {
 }
 
 void runTracer() {
-
 	SoundListener& player = tEng.listener;
 
 	// Initialize Raylib
 	InitWindow(0, 0, "RayCaster");
+	InitAudioDevice();
+	// Configure widow
 	int sWidth = (int)(GetScreenWidth() * 0.7f);
 	int sHeight = (int)(GetScreenHeight() * 0.7f);
 	SetWindowSize(sWidth, sHeight);
 	SetWindowPosition((int)(GetScreenHeight() * 0.15f), (int)(GetScreenWidth() * 0.15f));
 	SetConfigFlags(FLAG_MSAA_4X_HINT);
-	InitAudioDevice();
 
+	// Set up engine
 	tEng.loadMap(VERTEX_FILE);
-
 	// Create sound-sources
-	LineObject& snd = tEng.lB.lines[tEng.addObject(LineObject(Vec2{ 400, 400 }, 8, "resources/snap.mp3"))];
+	LineObject& snd = tEng.lB.lines[tEng.addObject(LineObject(player.getPosition(), 8, "resources/snap.mp3"))];
 	LineObject& snd2 = tEng.lB.lines[tEng.addObject(LineObject(Vec2{ 400, 400 }, 40, "resources/bottle.mp3"))];
 	LineObject& head = tEng.lB.lines[tEng.addObject(LineObject(Vec2(player.getPosition().x - 12.0f, player.getPosition().y + 30.0f), Vec2(player.getPosition().x + 12.0f, player.getPosition().y + 30.0f)))];
-
 	auto start = std::chrono::high_resolution_clock::now();
+
 	Vec2 movement, cameraMovement;
-	while (!WindowShouldClose())
-	{
-		movement = Vec2{ 0.0f, 0.0f };
-		cameraMovement = Vec2{ 0.0f, 0.0f };
+	while (!WindowShouldClose()) {
+
+		// Reset values
+		tEng.clearDetected();
+		movement = Vec2(0.0f);
+		cameraMovement = Vec2(0.0f);
 
 		// Process inputs
 		if (IsKeyPressed(KEY_SPACE)) snd.playSound();
@@ -89,38 +86,23 @@ void runTracer() {
 		if (IsKeyDown(KEY_S)) movement.y += PLAYER_SPEED;
 		if (IsKeyDown(KEY_A)) movement.x -= PLAYER_SPEED;
 		if (IsKeyDown(KEY_D)) movement.x += PLAYER_SPEED;
-
 		if (IsKeyDown(KEY_I)) cameraMovement.y -= PLAYER_SPEED;
 		if (IsKeyDown(KEY_K)) cameraMovement.y += PLAYER_SPEED;
 		if (IsKeyDown(KEY_J)) cameraMovement.x -= PLAYER_SPEED;
 		if (IsKeyDown(KEY_L)) cameraMovement.x += PLAYER_SPEED;
-		if (IsKeyDown(KEY_U)) tVis.cameraChangeZoom(0.005f);
-		if (IsKeyDown(KEY_O)) tVis.cameraChangeZoom(-0.005f);
+		if (IsKeyDown(KEY_U)) tVis.cameraChangeZoom(1.001f);
+		if (IsKeyDown(KEY_O)) tVis.cameraChangeZoom(1/1.001f);
 		
+		// Update positions
+		player.setPosition(player.getPosition() + movement);
 		tVis.moveCamera(cameraMovement.x, cameraMovement.y);
 		head.move(movement);
-		snd.start = player.getPosition();
-		player.setPosition(player.getPosition() + movement);
+		snd.move(movement);
 
 		// Render sound and visuals
 		tEng.listen();
 		tVis.draw();
-		tEng.clearDetected();
-		tEng.drawBuffer.reset();
-
-		totalRays += tEng.listener.getNumRays();
-		numFrames++;
 	}
-	auto end = std::chrono::high_resolution_clock::now();
-
 	CloseAudioDevice();
 	CloseWindow();
-
-	float elapsedTime = std::chrono::duration<double>(end - start).count();
-	std::cout << "\n\nSTATISTICS:"
-			<< "\nElapsed time(sec): " << elapsedTime
-			<< "\nAvg FPS: " << numFrames / elapsedTime
-			<< "\nAvg frame-time (ms): " << 1000.0f * elapsedTime / numFrames
-			<< "\nAvg # of rays per frame: " << totalRays / numFrames 
-			<< "\n\n" << std::endl;
 }
