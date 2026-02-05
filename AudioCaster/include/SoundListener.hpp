@@ -13,7 +13,6 @@
 #define THREAD_COUNT 8
 
 class SoundListener {
-private:
 
 	std::pair<Vec2, SoundInfo> detPairs[MAX_DETECTED] = {};
 	std::unordered_map<std::string, Sound> loadedSounds = {};
@@ -29,18 +28,21 @@ public:
 	std::mutex lock;
 	
 	SoundListener(LineBuffer& objects, DrawCallBuffer& drawBuffer, int numThreads);
-
 	~SoundListener();
 
-	/* Plays all the sounds detected by castRay(). */
+	/** Plays all the sounds detected by castRay(). */
 	void playDetectedSounds();
 
-	/* Clears buffer of detected sounds. */
+	/** Clears buffer of detected sounds. */
 	void clearDetected();
 
-	/* Listens for sounds from a buffer of objects
-	* objects, with elapsed time dTime. */
+	/** 
+	* Listens for sounds from a buffer of objects
+	* objects, with elapsed time dTime. 
+	* 
+	* @param objects the LineBuffer to iterate through for collision calculations */
 	void listen(LineBuffer& objects);
+
 
 	/* INLINE FUNCIONS */
 

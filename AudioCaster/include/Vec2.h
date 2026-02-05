@@ -3,9 +3,8 @@
 #include <raylib.h>
 #include <math.h>
 
-/* A wrapper class for raylib's Vector2 class*/
-struct Vec2
-{
+// A wrapper class for raylib's Vector2 class
+struct Vec2 {
 	Vector2 v = { 0.0f, 0.0f };
 	float& x = v.x;
 	float& y = v.y;
@@ -16,59 +15,49 @@ struct Vec2
 	Vec2(const Vec2& v) : v{ v.x, v.y } {}
 	Vec2(const Vector2& v) : v{ v.x, v.y } {}
 	
-	inline void operator=(const Vec2& other)
-	{
+	inline void operator=(const Vec2& other) {
 		x = other.x;
 		y = other.y;
 	}
 
-	static inline float dot(const Vec2& a, const Vec2& b)
-	{
+	static inline float dot(const Vec2& a, const Vec2& b) {
 		return a.x * b.x + a.y * b.y;
 	}
 
-	inline Vec2 operator+(const Vec2 &other) const
-	{
-		return Vec2{ x + other.x, y + other.y };
+	inline Vec2 operator+(const Vec2 &other) const {
+		return Vec2( x + other.x, y + other.y );
 	}
 
-	inline Vec2 operator-(const Vec2 &other) const
-	{
-		return Vec2{ x - other.x, y - other.y };
+	inline Vec2 operator-(const Vec2 &other) const {
+		return Vec2( x - other.x, y - other.y );
 	}
 
-	inline Vec2 operator*(const float &a) const
-	{
-		return Vec2{ a * x, a * y };
+	inline Vec2 operator*(const float &a) const {
+		return Vec2( a * x, a * y );
 	}
 
-	inline void operator+=(const Vec2 &other)
-	{
+	void operator+=(const Vec2 &other) {
 		x += other.x;
 		y += other.y;
 	}
 
-	inline void operator-=(const Vec2 &other)
-	{
+	void operator-=(const Vec2 &other) {
 		x -= other.x;
 		y -= other.y;
 	}
 
-	inline void operator=(const Vector2& other)
-	{
+	void operator=(const Vector2& other) {
 		x = other.x;
 		y = other.y;
 	}
 
-	inline void operator*=(const float a)
-	{
+	void operator*=(const float a) {
 		x *= a;
 		y *= a;
 	}
 
 
-	inline void normalize()
-	{
+	void normalize() {
 		float l = (float)sqrt(v.x * v.x + v.y * v.y);
 		x /= l;
 		y /= l;

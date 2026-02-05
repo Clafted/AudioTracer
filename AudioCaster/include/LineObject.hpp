@@ -14,13 +14,13 @@
 
 enum OBJECT_TYPE { WALL = 0, SOUND = 1 };
 
-struct LineObject
-{
+struct LineObject {
+
 	Vec2 start, end;
 	Vec2 normal;
-	
 	std::pair <SoundInfo, float> activeSounds[MAX_SOUND_COUNT] = {};
 	std::string soundFile = "";
+
 	float absorption = 0.0f;
 	float reflection = 0.5f;
 	float refraction = 0.3f;
@@ -31,21 +31,23 @@ struct LineObject
 	OBJECT_TYPE type = WALL;
 
 	LineObject() : type(WALL) {}
-	LineObject(Vec2 start, Vec2 end, OBJECT_TYPE type = WALL) : start(start), end(end), type(type) {
+
+	LineObject(Vec2 start, Vec2 end, OBJECT_TYPE type = WALL) 
+		: start(start), end(end), type(type) {
 		normal = Vec2{ end.y - start.y, start.x - end.x };
 		normal.normalize();
 		length = getLength(start, end);
 	}
-	LineObject(Vec2 start, int radius, const char* soundFile) : start(start), end(0), radius(radius), type(SOUND)
-	{
+
+	LineObject(Vec2 start, int radius, const char* soundFile) 
+		: start(start), end(0), radius(radius), type(SOUND)	{
 		this->soundFile = soundFile;
 		reflection = 0.6f;
 		refraction = 0.4f;
 		absorption = 1 - reflection - refraction;
 	}
 
-	void addSound(const char* file)
-	{
+	void addSound(const char* file)	{
 		this->soundFile = file;
 	}
 
@@ -59,8 +61,7 @@ struct LineObject
 	* Replace all inactive sounds with remaining active sounds.
 	* Maintains contiguity of activeSounds (i.e., all sounds from 0-numActive are active)
 	*/
-	void deleteOldSounds()
-	{
+	void deleteOldSounds() {
 		int firstEmpty = -1;
 		int currentActive = numActive;
 		float elapsedTime;
@@ -81,19 +82,19 @@ struct LineObject
 		}
 	}
 
-	float getSlope() {	
+	inline float getSlope() {	
 		return (end.y - start.y) / (end.x - start.x); 
 	}
 
-	float getNormal() {
+	inline float getNormal() {
 		return -(end.x - start.x) / (end.y - start.y);
 	}
 	 
-	static float getLength(const Vec2& p1, const Vec2& p2) {
+	inline static float getLength(const Vec2& p1, const Vec2& p2) {
 		return sqrt( (p1.x-p2.x)*(p1.x-p2.x) + (p1.y-p2.y)*(p1.y-p2.y) );
 	}
 	
-	bool containsPoint(const Vec2 &p) const {
+	inline bool containsPoint(const Vec2 &p) const {
 		return getLength(start, p) + getLength(p, end) - length < 0.5f;
 	}
 

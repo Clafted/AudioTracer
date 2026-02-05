@@ -21,16 +21,18 @@ public:
 	VertexBuffer vB;
 	DrawCallBuffer drawBuffer;
 	SoundListener listener;
-	float currentTime = 0.0f, prevTime = 0.0f, deltaTime = 0.0f;
+	float currentTime = 0.0f;
+	float prevTime = 0.0f;
+	float deltaTime = 0.0f;
 
 	TracerEngine();
 	TracerEngine(int numThreads);
 	~TracerEngine();
 
 	int loadMap(const char* path);
+	int addObject(LineObject object);
 	void listen();
 	void clearDetected();
-	int addObject(LineObject object);
 
 	inline float getFPS() {
 		return 1.0f / deltaTime;

@@ -124,11 +124,11 @@ void samplePixels(
 
 	spp = cur_sampleSize / cur_resolution;
 	for (int pxl = start; pxl < end; pxl++) {
-		theta = 6.28f * pxl / cur_resolution;
-		dest[pxl] = std::make_pair(Vec2(cos(theta), sin(theta)), SoundInfo());
-
+		
 		startSample = pxl * spp;
 		endSample = (pxl + 1) * spp;
+		theta = 6.28f * pxl / cur_resolution;
+		dest[pxl] = std::make_pair(Vec2(cos(theta), sin(theta)), SoundInfo());
 		if (cur_sampleSize - endSample <= spp) endSample = cur_sampleSize;
 		
 		accumulateSamples(

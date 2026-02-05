@@ -2,8 +2,7 @@
 
 #include <string>
 
-struct SoundInfo
-{
+struct SoundInfo {
 	std::string file = "";
 	float volume = 0.0f;
 

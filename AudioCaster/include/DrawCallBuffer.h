@@ -5,7 +5,7 @@
 
 #define MAX_CALLS_PER_FRAME 10000
 
-/*Class to concurrently store raylib calls to DrawLine(). Thread-safe.*/
+// Class to concurrently store raylib calls to DrawLine(). Thread-safe.
 class DrawCallBuffer {
 
 	DrawCall calls[MAX_CALLS_PER_FRAME] = {};
